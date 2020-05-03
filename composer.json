@@ -2,6 +2,10 @@
     "name": "pedrodavide/instagram-php",
     "description": "Instagram API",
     "type": "library",
+    "license": [
+        "RPL-1.5",
+        "proprietary"
+    ],
     "authors": [
         {
             "name": "pedrodavide",
