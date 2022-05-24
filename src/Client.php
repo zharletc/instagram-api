@@ -6,7 +6,7 @@ use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\SetCookie;
 use GuzzleHttp\HandlerStack;
-use function GuzzleHttp\Psr7\modify_request;
+use  GuzzleHttp\Psr7\Utils;
 use InstagramAPI\Exception\InstagramException;
 use InstagramAPI\Exception\LoginRequiredException;
 use InstagramAPI\Exception\ServerMessageThrower;
@@ -134,8 +134,8 @@ class Client
      * @param \InstagramAPI\Instagram $parent
      */
     public function __construct(
-        $parent)
-    {
+        $parent
+    ) {
         $this->_parent = $parent;
 
         // Defaults.
@@ -182,8 +182,8 @@ class Client
      * @throws \InstagramAPI\Exception\SettingsException
      */
     public function updateFromCurrentSettings(
-        $resetCookieJar = false)
-    {
+        $resetCookieJar = false
+    ) {
         // Update our internal client state from the new user's settings.
         $this->_userAgent = $this->_parent->device->getUserAgent();
         $this->loadCookieJar($resetCookieJar);
@@ -209,8 +209,8 @@ class Client
      * @throws \InstagramAPI\Exception\SettingsException
      */
     public function loadCookieJar(
-        $resetCookieJar = false)
-    {
+        $resetCookieJar = false
+    ) {
         // Mark any previous cookie jar for garbage collection.
         $this->_cookieJar = null;
 
@@ -268,16 +268,18 @@ class Client
     public function getCookie(
         $name,
         $domain = null,
-        $path = null)
-    {
+        $path = null
+    ) {
         $foundCookie = null;
         if ($this->_cookieJar instanceof CookieJar) {
             /** @var SetCookie $cookie */
             foreach ($this->_cookieJar->getIterator() as $cookie) {
-                if ($cookie->getName() === $name
+                if (
+                    $cookie->getName() === $name
                     && !$cookie->isExpired()
                     && ($domain === null || $cookie->matchesDomain($domain))
-                    && ($path === null || $cookie->matchesPath($path))) {
+                    && ($path === null || $cookie->matchesPath($path))
+                ) {
                     // Loop-"break" is omitted intentionally, because we might
                     // have more than one cookie with the same name, so we will
                     // return the LAST one. This is necessary because Instagram
@@ -351,8 +353,8 @@ class Client
      *                           a custom CA bundle file.
      */
     public function setVerifySSL(
-        $state)
-    {
+        $state
+    ) {
         $this->_verifySSL = $state;
     }
 
@@ -375,8 +377,8 @@ class Client
      *                                 Guzzle format, or NULL to disable proxying.
      */
     public function setProxy(
-        $value)
-    {
+        $value
+    ) {
         $this->_proxy = $value;
         $this->_resetConnection = true;
     }
@@ -403,8 +405,8 @@ class Client
      *                           disable override and let Guzzle use any interface.
      */
     public function setOutputInterface(
-        $value)
-    {
+        $value
+    ) {
         $this->_outputInterface = $value;
         $this->_resetConnection = true;
     }
@@ -437,8 +439,8 @@ class Client
         $uploadedBody,
         $uploadedBytes,
         HttpResponseInterface $response,
-        $responseBody)
-    {
+        $responseBody
+    ) {
         Debug::printRequest($method, $url);
 
         // Display the data body that was uploaded, if provided for debugging.
@@ -483,8 +485,8 @@ class Client
     public function mapServerResponse(
         Response $responseObject,
         $rawResponse,
-        HttpResponseInterface $httpResponse)
-    {
+        HttpResponseInterface $httpResponse
+    ) {
         // Attempt to decode the raw JSON to an array.
         // Important: Special JSON decoder which handles 64-bit numbers!
         $jsonArray = $this->api_body_decode($rawResponse, true);
@@ -551,7 +553,7 @@ class Client
                     );
                     if ($prettyJson !== false) {
                         Debug::printResponse(
-                            'Human-Readable Response:'.PHP_EOL.$prettyJson,
+                            'Human-Readable Response:' . PHP_EOL . $prettyJson,
                             false // Not truncated.
                         );
                     }
@@ -613,8 +615,8 @@ class Client
      * @return array A guzzle options array.
      */
     protected function _buildGuzzleOptions(
-        array $guzzleOptions = [])
-    {
+        array $guzzleOptions = []
+    ) {
         $criticalOptions = [
             'cookies' => ($this->_cookieJar instanceof CookieJar ? $this->_cookieJar : false),
             'verify'  => $this->_verifySSL,
@@ -671,8 +673,8 @@ class Client
      */
     protected function _guzzleRequest(
         HttpRequestInterface $request,
-        array $guzzleOptions = [])
-    {
+        array $guzzleOptions = []
+    ) {
         // Add critically important options for authenticating the request.
         $guzzleOptions = $this->_buildGuzzleOptions($guzzleOptions);
 
@@ -687,15 +689,15 @@ class Client
         // Detect very serious HTTP status codes in the response.
         $httpCode = $response->getStatusCode();
         switch ($httpCode) {
-        case 429: // "429 Too Many Requests"
-            throw new \InstagramAPI\Exception\ThrottledException('Throttled by Instagram because of too many API requests.');
-            break;
-        case 431: // "431 Request Header Fields Too Large"
-            throw new \InstagramAPI\Exception\RequestHeadersTooLargeException('The request start-line and/or headers are too large to process.');
-            break;
-        // WARNING: Do NOT detect 404 and other higher-level HTTP errors here,
-        // since we catch those later during steps like mapServerResponse()
-        // and autoThrow. This is a warning to future contributors!
+            case 429: // "429 Too Many Requests"
+                throw new \InstagramAPI\Exception\ThrottledException('Throttled by Instagram because of too many API requests.');
+                break;
+            case 431: // "431 Request Header Fields Too Large"
+                throw new \InstagramAPI\Exception\RequestHeadersTooLargeException('The request start-line and/or headers are too large to process.');
+                break;
+                // WARNING: Do NOT detect 404 and other higher-level HTTP errors here,
+                // since we catch those later during steps like mapServerResponse()
+                // and autoThrow. This is a warning to future contributors!
         }
 
         // We'll periodically auto-save our cookies at certain intervals. This
@@ -741,8 +743,8 @@ class Client
     protected function _apiRequest(
         HttpRequestInterface $request,
         array $guzzleOptions = [],
-        array $libraryOptions = [])
-    {
+        array $libraryOptions = []
+    ) {
         // Perform the API request and retrieve the raw HTTP response body.
         $guzzleResponse = $this->_guzzleRequest($request, $guzzleOptions);
 
@@ -772,7 +774,8 @@ class Client
                 $uploadedBody,
                 $uploadedBytes,
                 $guzzleResponse,
-                (string) $guzzleResponse->getBody());
+                (string) $guzzleResponse->getBody()
+            );
         }
 
         return $guzzleResponse;
@@ -790,10 +793,10 @@ class Client
      */
     public function api(
         HttpRequestInterface $request,
-        array $guzzleOptions = [])
-    {
+        array $guzzleOptions = []
+    ) {
         // Set up headers that are required for every request.
-        $request = modify_request($request, [
+        $request = Utils::modifyRequest($request, [
             'set_headers' => [
                 'User-Agent'       => $this->_userAgent,
                 // Keep the API's HTTPS connection alive in Guzzle for future
@@ -833,8 +836,8 @@ class Client
      */
     public static function api_body_decode(
         $json,
-        $assoc = true)
-    {
+        $assoc = true
+    ) {
         return @json_decode($json, $assoc, 512, JSON_BIGINT_AS_STRING);
     }
 
@@ -864,8 +867,8 @@ class Client
      * @param Request $endpoint The last processed request
      */
     public function setLastRequest(
-        $endpoint)
-    {
+        $endpoint
+    ) {
         $this->_lastRequest = $endpoint;
     }
 

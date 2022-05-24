@@ -538,14 +538,14 @@ class Request
         array $file)
     {
         if (isset($file['contents'])) {
-            $result = stream_for($file['contents']); // Throws.
+            $result = \GuzzleHttp\Psr7\Utils::streamFor($file['contents']); // Throws.
         } elseif (isset($file['filepath'])) {
             $handle = fopen($file['filepath'], 'rb');
             if ($handle === false) {
                 throw new \RuntimeException(sprintf('Could not open file "%s" for reading.', $file['filepath']));
             }
             $this->_handles[] = $handle;
-            $result = stream_for($handle); // Throws.
+            $result = \GuzzleHttp\Psr7\Utils::streamFor($handle); // Throws.
         } else {
             throw new \InvalidArgumentException('No data for stream creation.');
         }
@@ -625,10 +625,10 @@ class Request
     protected function _getUrlencodedBody()
     {
         $this->_headers['Content-Type'] = Constants::CONTENT_TYPE;
-
-        return stream_for( // Throws.
-            http_build_query(Utils::reorderByHashCode($this->_posts))
-        );
+        return \GuzzleHttp\Psr7\Utils::streamFor(http_build_query(Utils::reorderByHashCode($this->_posts)));
+        // return stream_for( // Throws.
+        //     http_build_query(Utils::reorderByHashCode($this->_posts))
+        // );
     }
 
     /**
@@ -644,7 +644,7 @@ class Request
         // Check and return raw body stream if set.
         if ($this->_body !== null) {
             if ($this->_isBodyCompressed) {
-                return stream_for(zlib_encode((string) $this->_body, ZLIB_ENCODING_GZIP));
+                return \GuzzleHttp\Psr7\Utils::streamFor(zlib_encode((string) $this->_body, ZLIB_ENCODING_GZIP));
             }
 
             return $this->_body;
@@ -665,7 +665,7 @@ class Request
         }
 
         if ($this->_isBodyCompressed) {
-            return stream_for(zlib_encode((string) $result, ZLIB_ENCODING_GZIP));
+            return \GuzzleHttp\Psr7\Utils::streamFor(zlib_encode((string) $result, ZLIB_ENCODING_GZIP));
         }
 
         return $result;
