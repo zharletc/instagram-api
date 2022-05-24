@@ -1,15 +1,16 @@
 {
-    "name": "pedrodavide/instagram-php",
+    "name": "zharletc/instagram-php",
     "description": "Instagram API",
     "type": "library",
+    "version": "1.0.0",
     "license": [
         "RPL-1.5",
         "proprietary"
     ],
     "authors": [
         {
-            "name": "pedrodavide",
-            "email": "pedro.davide@salesengineonline.com"
+            "name": "zharletc",
+            "email": "zharletc@imnoobs.com"
         }
     ],
     "autoload": {

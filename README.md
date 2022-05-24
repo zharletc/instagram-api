@@ -35,7 +35,7 @@ We use composer to distribute our code effectively and easily. If you do not alr
 
 Once you have composer installed, you can do the following:
 ```sh
-composer require mgp25/instagram-php
+composer require zharletc/instagram-php
 ```
 
 ```php
